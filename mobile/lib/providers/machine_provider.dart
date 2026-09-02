@@ -7,4 +7,10 @@ class MachineProvider extends ChangeNotifier {
   ];
 
   List<Machine> get machines => _machines;
+
+  int get availableCount =>
+      _machines.where((m) => m.status == MachineStatus.available).length;
+
+  int get occupiedCount =>
+      _machines.where((m) => m.status != MachineStatus.available).length;
 }
