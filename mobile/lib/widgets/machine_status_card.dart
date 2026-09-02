@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/machine.dart';
+import '../screens/machine_details_screen.dart';
 
 class MachineStatusCard extends StatelessWidget {
   final Machine machine;
@@ -40,33 +41,49 @@ class MachineStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(
-              machine.name,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "$_statusEmoji ${machine.statusLabel}",
-              style: TextStyle(
-                fontSize: 28,
-                color: _statusColor,
-                fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MachineDetailsScreen(machineId: machine.id),
+          ),
+        );
+      },
+      child: Card(
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Text(
+                machine.name,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text("Remaining Time", style: TextStyle(fontSize: 18)),
-            const SizedBox(height: 10),
-            Text(
-              _formattedTime,
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                "$_statusEmoji ${machine.statusLabel}",
+                style: TextStyle(
+                  fontSize: 28,
+                  color: _statusColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text("Remaining Time", style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 10),
+              Text(
+                _formattedTime,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

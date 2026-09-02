@@ -20,4 +20,13 @@ class MachineProvider extends ChangeNotifier {
 
   int get occupiedCount =>
       _machines.where((m) => m.status != MachineStatus.available).length;
+
+  Machine getById(String id) => _machines.firstWhere((m) => m.id == id);
+
+  void startMachine(String id) {
+    final machine = getById(id);
+    machine.status = MachineStatus.running;
+    machine.remainingSeconds = 1800; // 30 minutes, placeholder until M8 timer
+    notifyListeners();
+  }
 }
