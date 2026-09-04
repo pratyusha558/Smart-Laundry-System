@@ -15,7 +15,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<MachineProvider>().fetchMachines());
+    Future.microtask(() => context.read<MachineProvider>().startPolling());
+  }
+
+  @override
+  void dispose() {
+    context.read<MachineProvider>().stopPolling();
+    super.dispose();
   }
 
   @override

@@ -10,15 +10,22 @@ db.exec(`
   )
 `);
 
+// Add endTime column if it doesn't exist yet (safe to run every startup)
+try {
+  db.exec("ALTER TABLE machines ADD COLUMN endTime INTEGER");
+} catch (e) {
+  // Column already exists — ignore
+}
+
 const count = db.prepare("SELECT COUNT(*) as count FROM machines").get().count;
 
 if (count === 0) {
   const insert = db.prepare(
-    "INSERT INTO machines (id, name, status, remainingSeconds) VALUES (?, ?, ?, ?)"
+    "INSERT INTO machines (id, name, status, remainingSeconds, endTime) VALUES (?, ?, ?, ?, ?)"
   );
-  insert.run("m1", "Washing Machine #1", "available", 0);
-  insert.run("m2", "Washing Machine #2", "running", 720);
-  insert.run("m3", "Washing Machine #3", "available", 0);
+  insert.run("m1", "Washing Machine #1", "available", 0, null);
+  insert.run("m2", "Washing Machine #2", "available", 0, null);
+  insert.run("m3", "Washing Machine #3", "available", 0, null);
 }
 
 module.exports = db;
