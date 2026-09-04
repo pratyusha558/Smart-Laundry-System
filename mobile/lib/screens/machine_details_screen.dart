@@ -3,15 +3,22 @@ import 'package:provider/provider.dart';
 import '../models/machine.dart';
 import '../providers/machine_provider.dart';
 
-class MachineDetailsScreen extends StatelessWidget {
+class MachineDetailsScreen extends StatefulWidget {
   final String machineId;
 
   const MachineDetailsScreen({super.key, required this.machineId});
 
   @override
+  State<MachineDetailsScreen> createState() => _MachineDetailsScreenState();
+}
+
+class _MachineDetailsScreenState extends State<MachineDetailsScreen> {
+  bool _submitting = false;
+
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<MachineProvider>();
-    final machine = provider.getById(machineId);
+    final machine = provider.getById(widget.machineId);
 
     final minutes = (machine.remainingSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (machine.remainingSeconds % 60).toString().padLeft(2, '0');
@@ -36,14 +43,28 @@ class MachineDetailsScreen extends StatelessWidget {
             SizedBox(
               height: 55,
               child: ElevatedButton(
-                onPressed: machine.status == MachineStatus.available
-                    ? () {
-                        provider.startMachine(machine.id);
-                        Navigator.pop(context);
+                onPressed:
+                    (machine.status == MachineStatus.available && !_submitting)
+                    ? () async {
+                        setState(() => _submitting = true);
+                        final error = await provider.startMachine(machine.id);
+                        setState(() => _submitting = false);
+
+                        if (!context.mounted) return;
+
+                        if (error != null) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(error)));
+                        } else {
+                          Navigator.pop(context);
+                        }
                       }
                     : null,
                 child: Text(
-                  machine.status == MachineStatus.available
+                  _submitting
+                      ? "STARTING..."
+                      : machine.status == MachineStatus.available
                       ? "START / RESERVE"
                       : "NOT AVAILABLE",
                   style: const TextStyle(fontSize: 18),

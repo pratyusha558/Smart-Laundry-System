@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/machine.dart';
+import '../services/api_service.dart';
 
 class MachineProvider extends ChangeNotifier {
-  final List<Machine> _machines = [
-    Machine(id: "m1", name: "Washing Machine #1"),
-    Machine(
-      id: "m2",
-      name: "Washing Machine #2",
-      status: MachineStatus.running,
-      remainingSeconds: 720,
-    ),
-    Machine(id: "m3", name: "Washing Machine #3"),
-  ];
+  final ApiService _api = ApiService();
+
+  List<Machine> _machines = [];
+  bool isLoading = false;
+  String? errorMessage;
 
   List<Machine> get machines => _machines;
 
@@ -23,10 +19,30 @@ class MachineProvider extends ChangeNotifier {
 
   Machine getById(String id) => _machines.firstWhere((m) => m.id == id);
 
-  void startMachine(String id) {
-    final machine = getById(id);
-    machine.status = MachineStatus.running;
-    machine.remainingSeconds = 1800; // 30 minutes, placeholder until M8 timer
+  Future<void> fetchMachines() async {
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
+
+    try {
+      _machines = await _api.getMachines();
+    } catch (e) {
+      errorMessage = "Could not reach server. Is the backend running?";
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<String?> startMachine(String id) async {
+    try {
+      final updated = await _api.startMachine(id);
+      final index = _machines.indexWhere((m) => m.id == id);
+      _machines[index] = updated;
+      notifyListeners();
+      return null; // no error
+    } catch (e) {
+      return e.toString().replaceFirst("Exception: ", "");
+    }
   }
 }

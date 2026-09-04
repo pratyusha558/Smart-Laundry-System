@@ -1,5 +1,18 @@
 enum MachineStatus { available, reserved, running, completed }
 
+MachineStatus statusFromString(String s) {
+  switch (s) {
+    case "reserved":
+      return MachineStatus.reserved;
+    case "running":
+      return MachineStatus.running;
+    case "completed":
+      return MachineStatus.completed;
+    default:
+      return MachineStatus.available;
+  }
+}
+
 class Machine {
   final String id;
   final String name;
@@ -12,6 +25,15 @@ class Machine {
     this.status = MachineStatus.available,
     this.remainingSeconds = 0,
   });
+
+  factory Machine.fromJson(Map<String, dynamic> json) {
+    return Machine(
+      id: json['id'],
+      name: json['name'],
+      status: statusFromString(json['status']),
+      remainingSeconds: json['remainingSeconds'],
+    );
+  }
 
   String get statusLabel {
     switch (status) {
