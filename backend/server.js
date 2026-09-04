@@ -1,49 +1,57 @@
 const express = require("express");
 const cors = require("cors");
+const db = require("./db");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// In-memory data for now — replaced with a real database in M6.
-// Shape matches the Flutter Machine model exactly.
-let machines = [
-  { id: "m1", name: "Washing Machine #1", status: "available", remainingSeconds: 0 },
-  { id: "m2", name: "Washing Machine #2", status: "running", remainingSeconds: 720 },
-  { id: "m3", name: "Washing Machine #3", status: "available", remainingSeconds: 0 },
-];
-
 // GET all machines
 app.get("/api/machines", (req, res) => {
+  const machines = db.prepare("SELECT * FROM machines").all();
   res.json(machines);
 });
 
 // GET one machine
 app.get("/api/machines/:id", (req, res) => {
-  const machine = machines.find((m) => m.id === req.params.id);
+  const machine = db
+    .prepare("SELECT * FROM machines WHERE id = ?")
+    .get(req.params.id);
   if (!machine) return res.status(404).json({ error: "Machine not found" });
   res.json(machine);
 });
 
 // START a machine
 app.post("/api/machines/:id/start", (req, res) => {
-  const machine = machines.find((m) => m.id === req.params.id);
+  const machine = db
+    .prepare("SELECT * FROM machines WHERE id = ?")
+    .get(req.params.id);
   if (!machine) return res.status(404).json({ error: "Machine not found" });
   if (machine.status !== "available") {
     return res.status(400).json({ error: "Machine is not available" });
   }
-  machine.status = "running";
-  machine.remainingSeconds = 1800; // 30 minutes
-  res.json(machine);
+
+  db.prepare(
+    "UPDATE machines SET status = ?, remainingSeconds = ? WHERE id = ?"
+  ).run("running", 1800, req.params.id);
+
+  const updated = db.prepare("SELECT * FROM machines WHERE id = ?").get(req.params.id);
+  res.json(updated);
 });
 
 // COMPLETE a machine
 app.post("/api/machines/:id/complete", (req, res) => {
-  const machine = machines.find((m) => m.id === req.params.id);
+  const machine = db
+    .prepare("SELECT * FROM machines WHERE id = ?")
+    .get(req.params.id);
   if (!machine) return res.status(404).json({ error: "Machine not found" });
-  machine.status = "available";
-  machine.remainingSeconds = 0;
-  res.json(machine);
+
+  db.prepare(
+    "UPDATE machines SET status = ?, remainingSeconds = ? WHERE id = ?"
+  ).run("available", 0, req.params.id);
+
+  const updated = db.prepare("SELECT * FROM machines WHERE id = ?").get(req.params.id);
+  res.json(updated);
 });
 
 const PORT = 5000;
