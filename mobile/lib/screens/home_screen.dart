@@ -28,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MachineProvider>();
+    final showBanner =
+        provider.errorMessage != null && provider.machines.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -46,9 +48,26 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => provider.fetchMachines(),
-        child: _buildBody(provider),
+      body: Column(
+        children: [
+          if (showBanner)
+            Container(
+              width: double.infinity,
+              color: Colors.red.shade100,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: const Text(
+                "⚠ Connection lost — showing last known data",
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () => provider.fetchMachines(),
+              child: _buildBody(provider),
+            ),
+          ),
+        ],
       ),
     );
   }

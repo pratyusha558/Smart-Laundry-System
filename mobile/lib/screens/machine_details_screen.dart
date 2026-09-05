@@ -43,9 +43,10 @@ class _MachineDetailsScreenState extends State<MachineDetailsScreen> {
             SizedBox(
               height: 55,
               child: ElevatedButton(
-                onPressed:
-                    (machine.status == MachineStatus.available && !_submitting)
+                onPressed: machine.status == MachineStatus.available
                     ? () async {
+                        if (_submitting)
+                          return; // guards against double-tap race
                         setState(() => _submitting = true);
                         final error = await provider.startMachine(machine.id);
                         setState(() => _submitting = false);
