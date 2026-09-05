@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/machine_provider.dart';
 import 'screens/home_screen.dart';
+import 'services/api_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ApiService.init(); // load or create the persistent device ID first
   runApp(const SmartLaundryApp());
 }
 

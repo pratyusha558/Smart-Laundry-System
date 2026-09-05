@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/machine.dart';
 import '../providers/machine_provider.dart';
-import '../services/api_service.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -10,7 +9,6 @@ class AdminScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MachineProvider>();
-    final api = ApiService();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Admin: Machine Control")),
@@ -26,10 +24,7 @@ class AdminScreen extends StatelessWidget {
                 ),
                 trailing: ElevatedButton(
                   onPressed: machine.status == MachineStatus.running
-                      ? () async {
-                          await api.completeMachine(machine.id);
-                          provider.fetchMachines();
-                        }
+                      ? () => provider.adminCompleteMachine(machine.id)
                       : null,
                   child: const Text("Force Complete"),
                 ),

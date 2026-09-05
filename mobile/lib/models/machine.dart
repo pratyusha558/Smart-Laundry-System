@@ -18,12 +18,14 @@ class Machine {
   final String name;
   MachineStatus status;
   int remainingSeconds;
+  String? startedBy;
 
   Machine({
     required this.id,
     required this.name,
     this.status = MachineStatus.available,
     this.remainingSeconds = 0,
+    this.startedBy,
   });
 
   factory Machine.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Machine {
       name: json['name'],
       status: statusFromString(json['status']),
       remainingSeconds: json['remainingSeconds'],
+      startedBy: json['startedBy'],
     );
   }
 

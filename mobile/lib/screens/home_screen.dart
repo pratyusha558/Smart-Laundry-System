@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/machine_provider.dart';
@@ -13,16 +14,65 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  StreamSubscription<String>? _notificationSub;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<MachineProvider>().startPolling());
+    final provider = context.read<MachineProvider>();
+    Future.microtask(() => provider.startPolling());
+
+    _notificationSub = provider.notifications.listen((message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+      );
+    });
   }
 
   @override
   void dispose() {
     context.read<MachineProvider>().stopPolling();
+    _notificationSub?.cancel();
     super.dispose();
+  }
+
+  void _showAdminPinDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Admin PIN"),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(hintText: "Enter PIN"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text == "1234") {
+                Navigator.pop(dialogContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminScreen()),
+                );
+              } else {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text("Incorrect PIN")));
+              }
+            },
+            child: const Text("Enter"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -39,12 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.admin_panel_settings),
             tooltip: "Admin",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AdminScreen()),
-              );
-            },
+            onPressed: () => _showAdminPinDialog(context),
           ),
         ],
       ),
