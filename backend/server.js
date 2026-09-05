@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const SESSION_SECONDS = 1800; // 30 minutes
+const SESSION_SECONDS = parseInt(process.env.SESSION_SECONDS) || 1800; // 30 min default, override for demo
 
 // Computes live remainingSeconds from endTime, auto-completes if time is up.
 function resolveMachine(machine) {

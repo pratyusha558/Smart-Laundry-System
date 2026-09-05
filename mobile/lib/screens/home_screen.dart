@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/machine_provider.dart';
 import '../widgets/machine_status_card.dart';
 import '../widgets/dashboard_summary.dart';
+import 'admin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,7 +30,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = context.watch<MachineProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("🧺 Smart Laundry"), centerTitle: true),
+      appBar: AppBar(
+        title: const Text("🧺 Smart Laundry"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings),
+            tooltip: "Admin",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: () => provider.fetchMachines(),
         child: _buildBody(provider),
