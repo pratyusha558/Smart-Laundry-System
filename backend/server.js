@@ -90,6 +90,9 @@ const HARDWARE_SECRET = "laundry-esp32-key"; // shared secret, change if you wan
 const CURRENT_THRESHOLD_AMPS = 0.3; // tune this after real readings come in
 
 // Called directly by the ESP32 over WiFi with live current sensor readings
+const lowReadingStreak = {}; // machineId -> consecutive low-current readings
+const REQUIRED_LOW_READINGS = 3; // needs 3 readings in a row (~9 sec) below threshold to trust it
+
 app.post("/api/machines/:id/hardware-status", (req, res) => {
   const { secret, current } = req.body || {};
 
@@ -100,26 +103,37 @@ app.post("/api/machines/:id/hardware-status", (req, res) => {
     return res.status(400).json({ error: "current (amps) is required" });
   }
 
-  const machine = db.prepare("SELECT * FROM machines WHERE id = ?").get(req.params.id);
+  const id = req.params.id;
+  const machine = db.prepare("SELECT * FROM machines WHERE id = ?").get(id);
   if (!machine) return res.status(404).json({ error: "Machine not found" });
 
   const resolved = resolveMachine(machine);
   const isRunning = current > CURRENT_THRESHOLD_AMPS;
 
-  if (isRunning && resolved.status === "available") {
-    // Hardware detected the wash starting on its own
-    const endTime = Date.now() + SESSION_SECONDS * 1000;
-    db.prepare(
-      "UPDATE machines SET status = 'running', remainingSeconds = ?, endTime = ?, startedBy = 'hardware' WHERE id = ?"
-    ).run(SESSION_SECONDS, endTime, req.params.id);
-  } else if (!isRunning && resolved.status === "running" && resolved.startedBy === "hardware") {
-    // Only auto-release sessions hardware itself started — never a real user's reservation
-    db.prepare(
-      "UPDATE machines SET status = 'available', remainingSeconds = 0, endTime = NULL, startedBy = NULL WHERE id = ?"
-    ).run(req.params.id);
+  if (isRunning) {
+    lowReadingStreak[id] = 0; // reset — machine is clearly drawing current
+
+    if (resolved.status === "available") {
+      // Hardware detected the wash starting on its own (no app reservation)
+      const endTime = Date.now() + SESSION_SECONDS * 1000;
+      db.prepare(
+        "UPDATE machines SET status = 'running', remainingSeconds = ?, endTime = ?, startedBy = 'hardware' WHERE id = ?"
+      ).run(SESSION_SECONDS, endTime, id);
+    }
+    // If already running (user-started or hardware-started), nothing to do — just confirms it's alive
+  } else {
+    lowReadingStreak[id] = (lowReadingStreak[id] || 0) + 1;
+
+    if (resolved.status === "running" && lowReadingStreak[id] >= REQUIRED_LOW_READINGS) {
+      // Confirmed stopped for real — physical reality overrides ANY session, app timer or hardware-started
+      db.prepare(
+        "UPDATE machines SET status = 'available', remainingSeconds = 0, endTime = NULL, startedBy = NULL WHERE id = ?"
+      ).run(id);
+      lowReadingStreak[id] = 0;
+    }
   }
 
-  const updated = db.prepare("SELECT * FROM machines WHERE id = ?").get(req.params.id);
+  const updated = db.prepare("SELECT * FROM machines WHERE id = ?").get(id);
   res.json(resolveMachine(updated));
 });
 

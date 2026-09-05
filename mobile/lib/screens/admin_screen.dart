@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/machine.dart';
 import '../providers/machine_provider.dart';
+import '../widgets/gradient_scaffold.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -10,7 +11,7 @@ class AdminScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<MachineProvider>();
 
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(title: const Text("Admin: Machine Control")),
       body: ListView(
         padding: const EdgeInsets.all(16),

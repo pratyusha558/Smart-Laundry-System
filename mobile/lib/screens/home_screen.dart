@@ -5,6 +5,7 @@ import '../providers/machine_provider.dart';
 import '../widgets/machine_status_card.dart';
 import '../widgets/dashboard_summary.dart';
 import 'admin_screen.dart';
+import '../widgets/gradient_scaffold.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,9 +82,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final showBanner =
         provider.errorMessage != null && provider.machines.isNotEmpty;
 
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
-        title: const Text("🧺 Smart Laundry"),
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.local_laundry_service_rounded, size: 22),
+            SizedBox(width: 8),
+            Text("Smart Laundry"),
+          ],
+        ),
         centerTitle: true,
         actions: [
           IconButton(

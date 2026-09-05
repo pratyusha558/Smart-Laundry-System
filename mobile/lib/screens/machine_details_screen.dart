@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/machine.dart';
 import '../providers/machine_provider.dart';
+import '../widgets/gradient_scaffold.dart';
 
 class MachineDetailsScreen extends StatefulWidget {
   final String machineId;
@@ -27,7 +28,7 @@ class _MachineDetailsScreenState extends State<MachineDetailsScreen> {
     final minutes = (machine.remainingSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (machine.remainingSeconds % 60).toString().padLeft(2, '0');
 
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(title: Text(machine.name)),
       body: Padding(
         padding: const EdgeInsets.all(20),

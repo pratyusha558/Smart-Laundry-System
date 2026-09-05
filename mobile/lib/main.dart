@@ -21,7 +21,57 @@ class SmartLaundryApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Smart Laundry',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+          brightness: Brightness.dark,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF9C27B0), // vivid purple accent
+            brightness: Brightness.dark,
+          ),
+          scaffoldBackgroundColor: const Color(0xFF121016),
+          appBarTheme: const AppBarTheme(
+            elevation: 0,
+            centerTitle: true,
+            backgroundColor: Color(0xFF1B1721),
+            foregroundColor: Colors.white,
+            titleTextStyle: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          cardTheme: CardThemeData(
+            elevation: 4,
+            color: const Color(0xFF1E1A26), // elevated dark surface
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF9C27B0),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          textTheme: const TextTheme(
+            titleLarge: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            titleMedium: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            bodyMedium: TextStyle(color: Colors.white70),
+          ),
         ),
         home: const HomeScreen(),
       ),
